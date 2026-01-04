@@ -1,0 +1,30 @@
+{
+  "ReadingLists": [
+    {
+      "PutRequest": {
+        "Item": {
+          "id": { "S": "1" },
+          "userId": { "S": "1" },
+          "name": { "S": "Summer Reading 2024" },
+          "description": { "S": "Books to read during summer vacation" },
+          "bookIds": { "SS": ["1", "2", "4"] },
+          "createdAt": { "S": "2024-06-01T10:00:00Z" },
+          "updatedAt": { "S": "2024-06-15T14:30:00Z" }
+        }
+      }
+    },
+    {
+      "PutRequest": {
+        "Item": {
+          "id": { "S": "2" },
+          "userId": { "S": "1" },
+          "name": { "S": "Sci-Fi Favorites" },
+          "description": { "S": "My favorite science fiction novels" },
+          "bookIds": { "SS": ["2", "7"] },
+          "createdAt": { "S": "2024-05-10T10:00:00Z" },
+          "updatedAt": { "S": "2024-05-10T10:00:00Z" }
+        }
+      }
+    }
+  ]
+}
