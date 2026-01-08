@@ -34,6 +34,12 @@ export function Home() {
             </span>
           </h1>
 
+          <div className="mb-8">
+            <span className="bg-white/20 backdrop-blur-sm text-white text-xs font-bold px-4 py-1.5 rounded-full border border-white/30 uppercase tracking-widest">
+              Live AWS Build
+            </span>
+          </div>
+
           <p className="text-xl md:text-2xl mb-12 max-w-3xl mx-auto text-slate-200 leading-relaxed font-light">
             AI-powered recommendations tailored to your unique reading preferences. Discover books
             you'll love with intelligent suggestions.
