@@ -28,6 +28,7 @@ export interface ReadingList {
   name: string;
   description: string;
   bookIds: string[];
+  books?: any[]; // For backward compatibility with some Lambda versions
   createdAt: string;
   updatedAt: string;
 }

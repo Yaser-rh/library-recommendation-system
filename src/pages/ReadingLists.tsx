@@ -110,11 +110,15 @@ export function ReadingLists() {
                 key={list.id}
                 className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-xl hover:border-blue-300 transition-all duration-300 cursor-pointer"
               >
-                <h3 className="text-xl font-bold text-slate-900 mb-2">{list.name}</h3>
-                <p className="text-slate-600 mb-4 line-clamp-2">{list.description}</p>
+                <h3 className="text-xl font-bold text-slate-900 mb-2">
+                  {list.name || 'Untitled List'}
+                </h3>
+                <p className="text-slate-600 mb-4 line-clamp-2">
+                  {list.description || 'No description'}
+                </p>
                 <div className="flex items-center justify-between text-sm text-slate-500">
-                  <span>{list.bookIds.length} books</span>
-                  <span>Created {formatDate(list.createdAt)}</span>
+                  <span>{(list.bookIds || list.books || []).length} books</span>
+                  <span>Created {list.createdAt ? formatDate(list.createdAt) : 'N/A'}</span>
                 </div>
               </div>
             ))}
