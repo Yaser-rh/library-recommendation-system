@@ -461,8 +461,8 @@ Follow the same pattern to create:
 8. **Review and create**
 
 9. **Note these values**:
-   - User Pool ID (e.g., `us-east-1_abc123`)
-   - App Client ID (e.g., `1a2b3c4d5e6f7g8h9i0j`)
+   - User Pool ID (e.g., `us-east-1_AuaH5F23c`)
+   - App Client ID (e.g., `35jceo6alc8bvjf9r2hk2famv3`)
 
 #### Update Frontend Environment Variables
 
