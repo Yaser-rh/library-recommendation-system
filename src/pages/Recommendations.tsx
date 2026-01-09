@@ -153,9 +153,16 @@ export function Recommendations() {
             {/* Display recommendations with reasons */}
             <div className="space-y-6 mb-12">
               {recommendations.map((rec, index) => {
-                const book = recommendedBooks[index];
-                const displayTitle = book?.title || rec.title || 'Unknown Title';
-                const displayAuthor = book?.author || rec.author || 'Unknown Author';
+                // Find the full book details if we fetched them
+                const fullBook = recommendedBooks.find((b) => b.id === rec.bookId);
+
+                // Fallback to AI-provided data if full book details aren't available
+                const displayTitle = fullBook?.title || rec.title || 'Unknown Title';
+                const displayAuthor = fullBook?.author || rec.author || 'Unknown Author';
+                const displayGenre = fullBook?.genre || 'Recommendation';
+                const displayCover =
+                  fullBook?.coverImage ||
+                  `https://placehold.co/400x600?text=${encodeURIComponent(displayTitle)}`;
 
                 return (
                   <div
@@ -164,9 +171,9 @@ export function Recommendations() {
                   >
                     <div className="flex items-start gap-6">
                       <img
-                        src={book?.coverImage || 'https://placehold.co/400x600?text=No+Cover'}
+                        src={displayCover}
                         alt={displayTitle}
-                        className="w-28 h-40 object-cover rounded-xl shadow-lg"
+                        className="w-28 h-40 object-cover rounded-xl shadow-lg shrink-0"
                         onError={(e) => {
                           e.currentTarget.src = 'https://placehold.co/112x160?text=No+Cover';
                         }}
@@ -181,7 +188,7 @@ export function Recommendations() {
                               Confidence: {Math.round(rec.confidence * 100)}%
                             </span>
                           </div>
-                          <span className="badge-gradient px-3 py-1.5 text-sm">{book.genre}</span>
+                          <span className="badge-gradient px-3 py-1.5 text-sm">{displayGenre}</span>
                         </div>
                       </div>
                     </div>
