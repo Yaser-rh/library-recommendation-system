@@ -3,7 +3,7 @@ import { Button } from '@/components/common/Button';
 import { Modal } from '@/components/common/Modal';
 import { Input } from '@/components/common/Input';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { getReadingLists, createReadingList } from '@/services/api';
+import { getReadingLists, createReadingList, deleteReadingList } from '@/services/api';
 import { ReadingList } from '@/types';
 import { formatDate } from '@/utils/formatters';
 import { handleApiError, showSuccess } from '@/utils/errorHandling';
@@ -54,6 +54,21 @@ export function ReadingLists() {
       setNewListName('');
       setNewListDescription('');
       showSuccess('Reading list created successfully!');
+    } catch (error) {
+      handleApiError(error);
+    }
+  };
+
+  const handleDeleteList = async (e: React.MouseEvent, id: string) => {
+    e.stopPropagation();
+    if (!window.confirm('Are you sure you want to delete this reading list?')) {
+      return;
+    }
+
+    try {
+      await deleteReadingList(id);
+      setLists(lists.filter((list) => list.id !== id));
+      showSuccess('Reading list deleted successfully!');
     } catch (error) {
       handleApiError(error);
     }
@@ -110,9 +125,25 @@ export function ReadingLists() {
                 key={list.id}
                 className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-xl hover:border-blue-300 transition-all duration-300 cursor-pointer"
               >
-                <h3 className="text-xl font-bold text-slate-900 mb-2">
-                  {list.name || 'Untitled List'}
-                </h3>
+                <div className="flex justify-between items-start mb-2">
+                  <h3 className="text-xl font-bold text-slate-900 line-clamp-1">
+                    {list.name || 'Untitled List'}
+                  </h3>
+                  <button
+                    onClick={(e) => handleDeleteList(e, list.id)}
+                    className="p-1 text-slate-400 hover:text-red-500 transition-colors"
+                    title="Delete list"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"
+                      />
+                    </svg>
+                  </button>
+                </div>
                 <p className="text-slate-600 mb-4 line-clamp-2">
                   {list.description || 'No description'}
                 </p>

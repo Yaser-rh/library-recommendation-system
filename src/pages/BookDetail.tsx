@@ -2,8 +2,10 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Button } from '@/components/common/Button';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { getBook } from '@/services/api';
-import { Book } from '@/types';
+import { getBook, getReadingLists, updateReadingList } from '@/services/api';
+import { Book, ReadingList } from '@/types';
+import { Modal } from '@/components/common/Modal';
+import { showSuccess } from '@/utils/errorHandling';
 import { formatRating } from '@/utils/formatters';
 import { handleApiError } from '@/utils/errorHandling';
 
@@ -15,6 +17,9 @@ export function BookDetail() {
   const navigate = useNavigate();
   const [book, setBook] = useState<Book | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [userLists, setUserLists] = useState<ReadingList[]>([]);
+  const [isUpdating, setIsUpdating] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -39,9 +44,37 @@ export function BookDetail() {
     }
   };
 
-  // TODO: Implement add to reading list functionality
-  const handleAddToList = () => {
-    alert('Add to reading list functionality coming soon!');
+  const handleAddToList = async () => {
+    setIsModalOpen(true);
+    try {
+      const lists = await getReadingLists();
+      setUserLists(lists);
+    } catch (error) {
+      handleApiError(error);
+    }
+  };
+
+  const confirmAddToList = async (list: ReadingList) => {
+    if (!book) return;
+
+    // Check if book already in list
+    if (list.bookIds.includes(book.id)) {
+      alert(`"${book.title}" is already in "${list.name}"`);
+      return;
+    }
+
+    setIsUpdating(true);
+    try {
+      await updateReadingList(list.id, {
+        bookIds: [...list.bookIds, book.id],
+      });
+      showSuccess(`Added "${book.title}" to "${list.name}"`);
+      setIsModalOpen(false);
+    } catch (error) {
+      handleApiError(error);
+    } finally {
+      setIsUpdating(false);
+    }
   };
 
   if (isLoading) {
@@ -212,6 +245,59 @@ export function BookDetail() {
             <p className="text-slate-600 text-lg">Reviews section coming soon...</p>
           </div>
         </div>
+
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title="Add to Reading List"
+        >
+          <div className="space-y-4">
+            {userLists.length === 0 ? (
+              <div className="text-center py-6">
+                <p className="text-slate-600 mb-4">You don't have any reading lists yet.</p>
+                <Button variant="primary" onClick={() => navigate('/reading-lists')}>
+                  Create a List
+                </Button>
+              </div>
+            ) : (
+              <div className="max-h-60 overflow-y-auto space-y-2 pr-2">
+                {userLists.map((list) => (
+                  <button
+                    key={list.id}
+                    onClick={() => confirmAddToList(list)}
+                    disabled={isUpdating}
+                    className="w-full text-left p-4 rounded-xl border border-slate-200 hover:border-violet-300 hover:bg-violet-50 transition-all flex justify-between items-center group"
+                  >
+                    <div>
+                      <p className="font-bold text-slate-900 group-hover:text-violet-700 transition-colors">
+                        {list.name}
+                      </p>
+                      <p className="text-xs text-slate-500">{list.bookIds.length} books</p>
+                    </div>
+                    <svg
+                      className="w-5 h-5 text-slate-400 group-hover:text-violet-500 transition-colors"
+                      fill="none"
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
+                        strokeWidth={2}
+                        d="M12 4v16m8-8H4"
+                      />
+                    </svg>
+                  </button>
+                ))}
+              </div>
+            )}
+            <div className="pt-2">
+              <Button variant="secondary" onClick={() => setIsModalOpen(false)} className="w-full">
+                Cancel
+              </Button>
+            </div>
+          </div>
+        </Modal>
       </div>
     </div>
   );

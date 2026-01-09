@@ -266,7 +266,12 @@ export async function getReadingLists(): Promise<ReadingList[]> {
     headers,
   });
   if (!response.ok) throw new Error('Failed to fetch reading lists');
-  return response.json();
+  const data = await response.json();
+  // Ensure bookIds exists even if backend returns 'books'
+  return data.map((list: ReadingList) => ({
+    ...list,
+    bookIds: list.bookIds || (list as any).books || [],
+  }));
 }
 
 /**
@@ -297,13 +302,22 @@ export async function createReadingList(
   list: Omit<ReadingList, 'id' | 'createdAt' | 'updatedAt'>
 ): Promise<ReadingList> {
   const headers = await getAuthHeaders();
+  // Include both bookIds and books for compatibility
+  const payload = {
+    ...list,
+    books: list.bookIds,
+  };
   const response = await fetch(`${API_BASE_URL}/reading-lists`, {
     method: 'POST',
     headers,
-    body: JSON.stringify(list),
+    body: JSON.stringify(payload),
   });
   if (!response.ok) throw new Error('Failed to create reading list');
-  return response.json();
+  const data = await response.json();
+  return {
+    ...data,
+    bookIds: data.bookIds || data.books || [],
+  };
 }
 
 /**
@@ -315,13 +329,22 @@ export async function updateReadingList(
   list: Partial<ReadingList>
 ): Promise<ReadingList> {
   const headers = await getAuthHeaders();
+  // Include both bookIds and books if present
+  const payload: Partial<ReadingList> & { books?: string[] } = { ...list };
+  if (list.bookIds) {
+    payload.books = list.bookIds;
+  }
   const response = await fetch(`${API_BASE_URL}/reading-lists/${id}`, {
     method: 'PUT',
     headers,
-    body: JSON.stringify(list),
+    body: JSON.stringify(payload),
   });
   if (!response.ok) throw new Error('Failed to update reading list');
-  return response.json();
+  const data = await response.json();
+  return {
+    ...data,
+    bookIds: data.bookIds || data.books || [],
+  };
 }
 
 /**
