@@ -1,5 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { signIn, signUp, signOut, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
+import {
+  signIn,
+  signUp,
+  signOut,
+  getCurrentUser,
+  fetchAuthSession,
+  fetchUserAttributes,
+} from 'aws-amplify/auth';
 import { User } from '@/types';
 import { AuthContext, AuthContextType } from './AuthContextCore';
 
@@ -77,8 +84,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const session = await fetchAuthSession();
+        const session = await fetchAuthSession({ forceRefresh: true });
         const currentUser = await getCurrentUser();
+        const attributes = await fetchUserAttributes();
 
         const groups = (session.tokens?.idToken?.payload['cognito:groups'] as string[]) || [];
         console.log('Cognito Groups:', groups);
@@ -87,8 +95,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
 
         setUser({
           id: currentUser.userId,
-          email: '', // Map based on your Cognito attributes if needed
-          name: currentUser.username,
+          email: attributes.email || '', // Map based on your Cognito attributes if needed
+          name: attributes.name || currentUser.username,
           role: isAdmin ? 'admin' : 'user',
           createdAt: new Date().toISOString(),
         });
@@ -106,16 +114,18 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const { isSignedIn } = await signIn({ username: email, password });
       if (isSignedIn) {
-        const session = await fetchAuthSession();
+        const session = await fetchAuthSession({ forceRefresh: true });
+        const currentUser = await getCurrentUser();
+        const attributes = await fetchUserAttributes();
+
         const groups = (session.tokens?.idToken?.payload['cognito:groups'] as string[]) || [];
         console.log('Login Groups:', groups);
         const isAdmin = groups.includes('Admins') || groups.includes('admins');
 
-        const currentUser = await getCurrentUser();
         setUser({
           id: currentUser.userId,
-          email: email,
-          name: currentUser.username,
+          email: attributes.email || email,
+          name: attributes.name || currentUser.username,
           role: isAdmin ? 'admin' : 'user',
           createdAt: new Date().toISOString(),
         });

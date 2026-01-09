@@ -3,7 +3,8 @@ import { Button } from '@/components/common/Button';
 import { Modal } from '@/components/common/Modal';
 import { Input } from '@/components/common/Input';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { getReadingLists, createReadingList, deleteReadingList } from '@/services/api';
+import { getReadingLists, createReadingList, deleteReadingList, getBook } from '@/services/api';
+
 import { ReadingList } from '@/types';
 import { formatDate } from '@/utils/formatters';
 import { handleApiError, showSuccess } from '@/utils/errorHandling';
@@ -25,9 +26,31 @@ export function ReadingLists() {
   const loadLists = async () => {
     setIsLoading(true);
     try {
-      // TODO: Replace with DynamoDB query
       const data = await getReadingLists();
-      setLists(data);
+
+      // Fetch full book details for each list
+      const listsWithBooks = await Promise.all(
+        data.map(async (list) => {
+          const bookIds =
+            list.bookIds || ((Array.isArray(list.books) ? list.books : []) as string[]);
+          const books = await Promise.all(
+            bookIds.map(async (idOrBook) => {
+              if (typeof idOrBook === 'object') return idOrBook;
+              try {
+                return await getBook(idOrBook);
+              } catch {
+                return null;
+              }
+            })
+          );
+          return {
+            ...list,
+            books: books.filter((b) => b !== null),
+          };
+        })
+      );
+
+      setLists(listsWithBooks);
     } catch (error) {
       handleApiError(error);
     } finally {
@@ -123,10 +146,10 @@ export function ReadingLists() {
             {lists.map((list) => (
               <div
                 key={list.id}
-                className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-xl hover:border-blue-300 transition-all duration-300 cursor-pointer"
+                className="bg-white/90 backdrop-blur-sm rounded-xl shadow-sm border border-slate-200 p-6 hover:shadow-xl hover:border-blue-300 transition-all duration-300 cursor-pointer group"
               >
-                <div className="flex justify-between items-start mb-2">
-                  <h3 className="text-xl font-bold text-slate-900 line-clamp-1">
+                <div className="flex justify-between items-start mb-4">
+                  <h3 className="text-xl font-bold text-slate-900 line-clamp-1 group-hover:text-blue-600 transition-colors">
                     {list.name || 'Untitled List'}
                   </h3>
                   <button
@@ -144,12 +167,52 @@ export function ReadingLists() {
                     </svg>
                   </button>
                 </div>
-                <p className="text-slate-600 mb-4 line-clamp-2">
+
+                <p className="text-slate-600 mb-6 line-clamp-2 text-sm">
                   {list.description || 'No description'}
                 </p>
-                <div className="flex items-center justify-between text-sm text-slate-500">
+
+                {/* Book Previews */}
+                <div className="flex -space-x-3 mb-4 overflow-hidden py-1">
+                  {(list.books || []).slice(0, 4).map((book, i) => {
+                    // Handle both full Book objects and string IDs
+                    const cover =
+                      typeof book === 'object' && book.coverImage
+                        ? book.coverImage
+                        : `https://placehold.co/100x150?text=${typeof book === 'string' ? 'Book' : 'Cover'}`;
+                    const title = typeof book === 'object' ? book.title : 'Book Title';
+
+                    return (
+                      <div
+                        key={i}
+                        className="relative w-12 h-16 rounded-md shadow-md border-2 border-white overflow-hidden flex-shrink-0 transition-transform hover:-translate-y-1"
+                      >
+                        <img
+                          src={cover}
+                          alt={title}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            e.currentTarget.src = 'https://placehold.co/100x150?text=No+Cover';
+                          }}
+                        />
+                      </div>
+                    );
+                  })}
+                  {(list.books || []).length === 0 && (
+                    <div className="w-12 h-16 rounded-md bg-slate-100 border-2 border-white flex items-center justify-center text-xs text-slate-400">
+                      Empty
+                    </div>
+                  )}
+                  {(list.books || []).length > 4 && (
+                    <div className="w-12 h-16 rounded-md bg-slate-100 border-2 border-white flex items-center justify-center text-xs font-bold text-slate-500 z-10">
+                      +{(list.books || []).length - 4}
+                    </div>
+                  )}
+                </div>
+
+                <div className="flex items-center justify-between text-xs text-slate-500 font-medium border-t pt-4">
                   <span>{(list.bookIds || list.books || []).length} books</span>
-                  <span>Created {list.createdAt ? formatDate(list.createdAt) : 'N/A'}</span>
+                  <span>{list.createdAt ? formatDate(list.createdAt) : 'Just now'}</span>
                 </div>
               </div>
             ))}
