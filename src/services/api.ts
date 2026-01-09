@@ -270,7 +270,7 @@ export async function getReadingLists(): Promise<ReadingList[]> {
   // Ensure bookIds exists even if backend returns 'books'
   return data.map((list: ReadingList) => ({
     ...list,
-    bookIds: list.bookIds || (list as any).books || [],
+    bookIds: list.bookIds || (list as ReadingList & { books?: string[] }).books || [],
   }));
 }
 
