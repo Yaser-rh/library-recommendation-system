@@ -3,7 +3,7 @@ import { Button } from '@/components/common/Button';
 import { Input } from '@/components/common/Input';
 import { Modal } from '@/components/common/Modal';
 import { LoadingSpinner } from '@/components/common/LoadingSpinner';
-import { getBooks, createBook, deleteBook } from '@/services/api';
+import { getBooks, createBook, updateBook, deleteBook } from '@/services/api';
 import { Book } from '@/types';
 import { handleApiError, showSuccess } from '@/utils/errorHandling';
 
@@ -14,7 +14,9 @@ export function Admin() {
   const [books, setBooks] = useState<Book[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newBook, setNewBook] = useState({
+  const [editingBookId, setEditingBookId] = useState<string | null>(null);
+
+  const initialBookState = {
     title: '',
     author: '',
     genre: '',
@@ -23,7 +25,9 @@ export function Admin() {
     rating: 0,
     publishedYear: new Date().getFullYear(),
     isbn: '',
-  });
+  };
+
+  const [formData, setFormData] = useState(initialBookState);
 
   useEffect(() => {
     loadBooks();
@@ -41,19 +45,45 @@ export function Admin() {
     }
   };
 
-  const handleCreateBook = async () => {
-    if (!newBook.title || !newBook.author) {
+  const handleOpenCreateModal = () => {
+    setEditingBookId(null);
+    setFormData(initialBookState);
+    setIsModalOpen(true);
+  };
+
+  const handleOpenEditModal = (book: Book) => {
+    setEditingBookId(book.id);
+    setFormData({
+      title: book.title,
+      author: book.author,
+      genre: book.genre,
+      description: book.description,
+      coverImage: book.coverImage,
+      rating: book.rating,
+      publishedYear: book.publishedYear,
+      isbn: book.isbn,
+    });
+    setIsModalOpen(true);
+  };
+
+  const handleSubmit = async () => {
+    if (!formData.title || !formData.author) {
       alert('Please fill in required fields');
       return;
     }
 
     try {
-      // TODO: Replace with Lambda API call
-      const created = await createBook(newBook);
-      setBooks([...books, created]);
+      if (editingBookId) {
+        const updated = await updateBook(editingBookId, formData);
+        setBooks(books.map((b) => (b.id === editingBookId ? updated : b)));
+        showSuccess('Book updated successfully!');
+      } else {
+        const created = await createBook(formData);
+        setBooks([...books, created]);
+        showSuccess('Book added successfully!');
+      }
       setIsModalOpen(false);
-      resetForm();
-      showSuccess('Book added successfully!');
+      setFormData(initialBookState);
     } catch (error) {
       handleApiError(error);
     }
@@ -71,19 +101,6 @@ export function Admin() {
     } catch (error) {
       handleApiError(error);
     }
-  };
-
-  const resetForm = () => {
-    setNewBook({
-      title: '',
-      author: '',
-      genre: '',
-      description: '',
-      coverImage: '',
-      rating: 0,
-      publishedYear: new Date().getFullYear(),
-      isbn: '',
-    });
   };
 
   if (isLoading) {
@@ -124,7 +141,7 @@ export function Admin() {
         <div className="bg-white/90 backdrop-blur-sm rounded-xl shadow-lg border border-slate-200 p-6">
           <div className="flex justify-between items-center mb-6">
             <h2 className="text-2xl font-bold text-slate-900">Manage Books</h2>
-            <Button variant="primary" onClick={() => setIsModalOpen(true)}>
+            <Button variant="primary" onClick={handleOpenCreateModal}>
               Add New Book
             </Button>
           </div>
@@ -149,7 +166,11 @@ export function Admin() {
                     <td className="py-3 px-4">{book.rating}</td>
                     <td className="py-3 px-4">
                       <div className="flex gap-2">
-                        <Button variant="secondary" size="sm">
+                        <Button
+                          variant="secondary"
+                          size="sm"
+                          onClick={() => handleOpenEditModal(book)}
+                        >
                           Edit
                         </Button>
                         <Button
@@ -168,38 +189,42 @@ export function Admin() {
           </div>
         </div>
 
-        {/* Add Book Modal */}
-        <Modal isOpen={isModalOpen} onClose={() => setIsModalOpen(false)} title="Add New Book">
+        {/* Create/Edit Book Modal */}
+        <Modal
+          isOpen={isModalOpen}
+          onClose={() => setIsModalOpen(false)}
+          title={editingBookId ? 'Edit Book' : 'Add New Book'}
+        >
           <div className="max-h-[60vh] overflow-y-auto">
             <Input
               label="Title"
               type="text"
-              value={newBook.title}
-              onChange={(e) => setNewBook({ ...newBook, title: e.target.value })}
+              value={formData.title}
+              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
               required
             />
 
             <Input
               label="Author"
               type="text"
-              value={newBook.author}
-              onChange={(e) => setNewBook({ ...newBook, author: e.target.value })}
+              value={formData.author}
+              onChange={(e) => setFormData({ ...formData, author: e.target.value })}
               required
             />
 
             <Input
               label="Genre"
               type="text"
-              value={newBook.genre}
-              onChange={(e) => setNewBook({ ...newBook, genre: e.target.value })}
+              value={formData.genre}
+              onChange={(e) => setFormData({ ...formData, genre: e.target.value })}
               required
             />
 
             <div className="mb-4">
               <label className="block text-sm font-medium text-slate-700 mb-1">Description</label>
               <textarea
-                value={newBook.description}
-                onChange={(e) => setNewBook({ ...newBook, description: e.target.value })}
+                value={formData.description}
+                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
                 className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-primary-500 min-h-[100px] resize-none"
               />
             </div>
@@ -207,8 +232,8 @@ export function Admin() {
             <Input
               label="Cover Image URL"
               type="text"
-              value={newBook.coverImage}
-              onChange={(e) => setNewBook({ ...newBook, coverImage: e.target.value })}
+              value={formData.coverImage}
+              onChange={(e) => setFormData({ ...formData, coverImage: e.target.value })}
             />
 
             <Input
@@ -217,27 +242,29 @@ export function Admin() {
               min="0"
               max="5"
               step="0.1"
-              value={newBook.rating}
-              onChange={(e) => setNewBook({ ...newBook, rating: parseFloat(e.target.value) })}
+              value={formData.rating}
+              onChange={(e) => setFormData({ ...formData, rating: parseFloat(e.target.value) })}
             />
 
             <Input
               label="Published Year"
               type="number"
-              value={newBook.publishedYear}
-              onChange={(e) => setNewBook({ ...newBook, publishedYear: parseInt(e.target.value) })}
+              value={formData.publishedYear}
+              onChange={(e) =>
+                setFormData({ ...formData, publishedYear: parseInt(e.target.value) })
+              }
             />
 
             <Input
               label="ISBN"
               type="text"
-              value={newBook.isbn}
-              onChange={(e) => setNewBook({ ...newBook, isbn: e.target.value })}
+              value={formData.isbn}
+              onChange={(e) => setFormData({ ...formData, isbn: e.target.value })}
             />
 
             <div className="flex gap-3 mt-6">
-              <Button variant="primary" onClick={handleCreateBook} className="flex-1">
-                Add Book
+              <Button variant="primary" onClick={handleSubmit} className="flex-1">
+                {editingBookId ? 'Update Book' : 'Add Book'}
               </Button>
               <Button variant="secondary" onClick={() => setIsModalOpen(false)} className="flex-1">
                 Cancel
