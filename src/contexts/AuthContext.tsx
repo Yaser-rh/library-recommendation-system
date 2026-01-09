@@ -81,7 +81,9 @@ export function AuthProvider({ children }: AuthProviderProps) {
         const currentUser = await getCurrentUser();
 
         const groups = (session.tokens?.idToken?.payload['cognito:groups'] as string[]) || [];
-        const isAdmin = groups.includes('Admins');
+        console.log('Cognito Groups:', groups);
+        const isAdmin = groups.includes('Admins') || groups.includes('admins');
+        console.log('is Admin:', isAdmin);
 
         setUser({
           id: currentUser.userId,
@@ -106,7 +108,8 @@ export function AuthProvider({ children }: AuthProviderProps) {
       if (isSignedIn) {
         const session = await fetchAuthSession();
         const groups = (session.tokens?.idToken?.payload['cognito:groups'] as string[]) || [];
-        const isAdmin = groups.includes('Admins');
+        console.log('Login Groups:', groups);
+        const isAdmin = groups.includes('Admins') || groups.includes('admins');
 
         const currentUser = await getCurrentUser();
         setUser({
