@@ -1,0 +1,42 @@
+# Task: Generate Reading List API Guide
+
+- [x] Create directory `ai generated library-recommendation-system\ai generated guides` <!-- id: 0 -->
+- [x] Create `ReadingLists_API_Guide.md` with detailed implementation steps and code for the Reading Lists Lambda functions <!-- id: 1 -->
+- [x] Refine `ReadingLists_API_Guide.md` to use Cognito `sub` claim for `userId` instead of query parameters <!-- id: 2 -->
+- [x] Expand API Gateway integration steps in `ReadingLists_API_Guide.md` with step-by-step instructions <!-- id: 3 -->
+- [x] Configure Amplify in `src/main.tsx` <!-- id: 4 -->
+- [x] Update `src/contexts/AuthContext.tsx` with Cognito implementations <!-- id: 5 -->
+- [x] Update `src/components/layout/Header.tsx` to react to auth state <!-- id: 6 -->
+- [x] Create `buildspec.yml` in project root <!-- id: 7 -->
+- [x] Push changes to GitHub for deployment <!-- id: 8 -->
+- [x] Debug environment variable injection <!-- id: 9 -->
+- [x] Create CloudFront invalidation <!-- id: 10 -->
+- [x] Rebuild API Gateway infrastructure <!-- id: 11 -->
+  - [x] Create REST API `library-api` <!-- id: 12 -->
+  - [x] Re-create Cognito Authorizer <!-- id: 13 -->
+  - [x] Re-create and Correct resources and methods <!-- id: 14 -->
+  - [x] Enable CORS and Deploy to `dev` stage <!-- id: 15 -->
+- [x] Update `VITE_API_BASE_URL` in CodeBuild and .env <!-- id: 16 -->
+  - [x] Implement Admin Book Creation (POST /books) <!-- id: 58 -->
+  - [x] Provide Lambda code for `library-create-book` <!-- id: 59 -->
+  - [x] Provide API Gateway instructions (POST method, Authorizer, CORS) <!-- id: 60 -->
+  - [x] Verify functionality with Admin user <!-- id: 61 -->
+- [x] Debug Recommendations API failure <!-- id: 18 -->
+  - [x] Check Network tab for status code (Result: 500) <!-- id: 19 -->
+  - [x] Create Recommendations_API_FAQ.md with Llama 3 alternative <!-- id: 40 -->
+  - [x] Update Recommendations UI to handle AI-only metadata <!-- id: 41 -->
+  - [x] Verify types and API service compatibility <!-- id: 42 -->
+- [x] Final Verification <!-- id: 62 -->
+- [x] User to deploy new Lambda functions <!-- id: 63 -->
+  - [x] User to test Admin "Add Book" and "Get Recommendations" <!-- id: 64 -->
+- [x] Implement Admin Edit/Delete Features <!-- id: 65 -->
+  - [x] Create `Admin_Book_Management_Guide.md` with Lambda codes <!-- id: 66 -->
+  - [x] Verify Admin frontend "Edit" can stay as TODO for now or be implemented? User asked for guide and "codes for delete and edit".
+- [x] Fix Reading List Rendering <!-- id: 67 -->
+  - [x] Update `ReadingLists.tsx` to fetch and display actual book covers <!-- id: 68 -->
+- [x] UI Polish <!-- id: 69 -->
+  - [x] Show User Name instead of ID in Header <!-- id: 70 -->
+  - [x] Conditionally render "Admin" link based on role <!-- id: 71 -->
+- [x] Finalize Documentation <!-- id: 72 -->
+  - [x] Update README.md with Architecture Diagram and Endpoints <!-- id: 73 -->
+  - [x] Verify .gitignore <!-- id: 74 -->

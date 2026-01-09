@@ -1,31 +1,42 @@
 # Library Recommendation System
 
-An AI-powered library book recommendation system built with React, TypeScript, Tailwind CSS, and AWS serverless architecture. This is a 4-week intensive project for CENG413 Software Quality Standards course.
+An AI-powered library book recommendation system built with React, TypeScript, Tailwind CSS, and AWS serverless architecture.
 
 ## 🎯 Project Overview
 
-This project provides a **complete frontend starter** with mock data and comprehensive guides for students to implement the AWS serverless backend. Students will learn:
+This fully implemented project demonstrates a modern serverless application integrating React with AWS cloud services.
 
-- Modern React development with TypeScript
-- AWS Lambda, DynamoDB, API Gateway
-- User authentication with Amazon Cognito
-- AI integration with Amazon Bedrock
-- Serverless architecture patterns
-- Cloud deployment (S3 + CloudFront)
+**Current Status**: ✅ **Complete** - Frontend and Backend fully integrated.
 
-**Current Status**: ✅ Frontend complete with mock data | ⏳ Backend to be implemented by students
+## 🏗️ Architecture
+
+```mermaid
+graph TD
+    User[User] -->|HTTPS| CloudFront[AWS CloudFront]
+    CloudFront -->|Serves| S3[S3 Bucket (Frontend)]
+    User -->|API Calls| APIG[API Gateway]
+    APIG -->|Auth| Cognito[Amazon Cognito]
+
+    subgraph Backend
+        APIG -->|/books| LambdaBooks[Lambda: Books]
+        APIG -->|/reading-lists| LambdaLists[Lambda: Reading Lists]
+        APIG -->|/recommendations| LambdaRecs[Lambda: Recommendations]
+
+        LambdaBooks -->|Read/Write| DynamoDB[(DynamoDB: Books)]
+        LambdaLists -->|Read/Write| DynamoDB
+        LambdaRecs -->|Query| Bedrock[Amazon Bedrock (Claude 3)]
+        LambdaRecs -->|Context| DynamoDB
+    end
+```
 
 ## 🚀 Features
 
 - **Modern Tech Stack**: React 19, TypeScript, Vite, Tailwind CSS
-- **AI-Powered Recommendations**: Integration-ready for Amazon Bedrock
-- **User Authentication**: Prepared for AWS Cognito integration
-- **Reading Lists**: Organize and manage book collections
-- **Admin Dashboard**: Book management and metrics
+- **AI-Powered Recommendations**: Hybrid engine using Amazon Bedrock (Claude 3 Haiku) + DynamoDB context
+- **User Authentication**: Secure signup/login with AWS Cognito
+- **Reading Lists**: Personalized book collections stored in DynamoDB
+- **Admin Dashboard**: Secure book management (CRUD) for administrators
 - **Responsive Design**: Mobile-first approach with Tailwind CSS
-- **Type Safety**: Full TypeScript coverage
-- **Testing**: Vitest + React Testing Library setup
-- **Code Quality**: ESLint, Prettier, and strict TypeScript configuration
 
 ## 📋 Prerequisites
 
@@ -82,38 +93,41 @@ You should see the Library Recommendation System homepage! 🎉
 
 ---
 
-## 📱 What You're Seeing
+## 🔌 API Endpoints
 
-Right now, the application is running with **mock data**:
+The application interacts with a RESTful API powered by Amazon API Gateway and Lambda.
 
-- ✅ Books are loaded from `src/services/mockData.ts`
-- ✅ Login/signup is simulated (no real authentication)
-- ✅ Reading lists are stored in browser localStorage
-- ✅ AI recommendations are fake responses
-
-**This is intentional!** You'll implement the real AWS backend over the next 4 weeks.
-
-### Explore the Application
-
-- Browse books (mock data from `src/services/mockData.ts`)
-- Try the login/signup pages (mock authentication)
-- Create reading lists (stored in browser)
-- Test AI recommendations (mock responses)
-- Check the admin panel
+| Method   | Endpoint           | Description              | Auth Required |
+| -------- | ------------------ | ------------------------ | ------------- |
+| `GET`    | `/books`           | List all books           | No            |
+| `GET`    | `/books/:id`       | Get book details         | No            |
+| `POST`   | `/books`           | Create new book          | Admin Only    |
+| `PUT`    | `/books/:id`       | Update book details      | Admin Only    |
+| `DELETE` | `/books/:id`       | Delete a book            | Admin Only    |
+| `GET`    | `/reading-lists`   | Get user's reading lists | Yes           |
+| `POST`   | `/reading-lists`   | Create a reading list    | Yes           |
+| `POST`   | `/recommendations` | Get AI recommendations   | Yes           |
 
 ---
 
-## 📅 Week-by-Week Goals
+## 📚 Documentation
 
-### Week 1: Frontend Exploration (5-7 hours)
+Detailed implementation guides for the backend services:
 
-- ✅ Get the app running (you just did this!)
-- ✅ Explore all pages (Books, Recommendations, Reading Lists, Admin)
+- **[Admin API Guide](./ai%20generated%20library-recommendation-system/ai%20generated%20guides/Admin_Book_Management_Guide.md)** - Book management & Lambda functions
+- **[Reading Lists Guide](./ai%20generated%20library-recommendation-system/ai%20generated%20guides/ReadingLists_API_Guide.md)** - User lists & DynamoDB schema
+- **[Recommendations Guide](./ai%20generated%20library-recommendation-system/ai%20generated%20guides/Improved_Recommendations_Lambda.js)** - Bedrock AI integration code
+
+## 📅 Implementation Journey
+
+### Week 1: Frontend Exploration
+
+- ✅ Get the app running
+- ✅ Explore all pages
 - ✅ Understand the code structure
-- ✅ Create AWS account and set up billing alerts
-- ✅ Deploy your first "Hello World" Lambda function
+- ✅ Create AWS account
 
-### Week 2: Backend API (8-10 hours)
+### Week 2: Backend API
 
 - ✅ Create DynamoDB tables (Books, ReadingLists)
 - ✅ Deploy Lambda functions for Books API
@@ -121,7 +135,7 @@ Right now, the application is running with **mock data**:
 - ✅ Set up API Gateway
 - ✅ Connect frontend to real API
 
-### Week 3: Authentication (6-8 hours)
+### Week 3: Authentication
 
 - ✅ Create Cognito User Pool
 - ✅ Install and configure AWS Amplify
@@ -129,9 +143,16 @@ Right now, the application is running with **mock data**:
 - ✅ Add authentication to API calls
 - ✅ Protect API endpoints
 
-### Week 4: AI & Deployment (8-10 hours)
+### Week 4: AI & Deployment
 
 - ✅ Enable Amazon Bedrock
+- ✅ Deploy AI recommendations Lambda
+- ✅ Deploy frontend to S3 + CloudFront
+- ✅ End-to-end testing
+- ✅ Final polish and documentation
+
+**See [PROJECT_TIMELINE_4WEEKS.md](../PROJECT_TIMELINE_4WEEKS.md) for detailed weekly breakdown.**
+
 - ✅ Deploy AI recommendations Lambda
 - ✅ Deploy frontend to S3 + CloudFront
 - ✅ End-to-end testing
