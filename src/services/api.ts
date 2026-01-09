@@ -234,7 +234,10 @@ export async function getRecommendations(query: string): Promise<Recommendation[
     headers,
     body: JSON.stringify({ query }),
   });
-  if (!response.ok) throw new Error('Failed to get recommendations');
+  if (!response.ok) {
+    const errorData = await response.json().catch(() => ({}));
+    throw new Error(errorData.details || errorData.error || 'Failed to get recommendations');
+  }
   const data = await response.json();
   return data.recommendations;
 }
