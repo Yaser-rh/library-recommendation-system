@@ -28,7 +28,7 @@ export interface ReadingList {
   name: string;
   description: string;
   bookIds: string[];
-  books?: any[]; // For backward compatibility with some Lambda versions
+  books?: (Book | string)[]; // For backward compatibility with some Lambda versions
   createdAt: string;
   updatedAt: string;
 }
@@ -45,6 +45,8 @@ export interface Review {
 export interface Recommendation {
   id: string;
   bookId: string;
+  title?: string;
+  author?: string;
   reason: string;
   confidence: number;
 }

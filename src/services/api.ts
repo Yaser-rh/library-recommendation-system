@@ -330,7 +330,7 @@ export async function updateReadingList(
 ): Promise<ReadingList> {
   const headers = await getAuthHeaders();
   // Include both bookIds and books if present
-  const payload: Partial<ReadingList> & { books?: string[] } = { ...list };
+  const payload: Partial<ReadingList> = { ...list };
   if (list.bookIds) {
     payload.books = list.bookIds;
   }

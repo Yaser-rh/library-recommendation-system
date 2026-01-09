@@ -36,8 +36,19 @@ export function Recommendations() {
       const recs = await getRecommendations(query);
       setRecommendations(recs);
 
-      // Fetch full book details for each recommendation
-      const books = await Promise.all(recs.map((rec) => getBook(rec.bookId)));
+      // Fetch full book details for each recommendation if bookId is present
+      const books = await Promise.all(
+        recs.map(async (rec) => {
+          if (rec.bookId) {
+            try {
+              return await getBook(rec.bookId);
+            } catch {
+              return null;
+            }
+          }
+          return null;
+        })
+      );
       setRecommendedBooks(books.filter((book): book is Book => book !== null));
     } catch (error) {
       handleApiError(error);
@@ -143,25 +154,26 @@ export function Recommendations() {
             <div className="space-y-6 mb-12">
               {recommendations.map((rec, index) => {
                 const book = recommendedBooks[index];
-                if (!book) return null;
+                const displayTitle = book?.title || rec.title || 'Unknown Title';
+                const displayAuthor = book?.author || rec.author || 'Unknown Author';
 
                 return (
                   <div
-                    key={rec.id}
+                    key={rec.id || index}
                     className="glass-effect rounded-2xl shadow-xl border border-white/20 p-6 hover-glow transition-all duration-300"
                   >
                     <div className="flex items-start gap-6">
                       <img
-                        src={book.coverImage}
-                        alt={book.title}
+                        src={book?.coverImage || 'https://placehold.co/400x600?text=No+Cover'}
+                        alt={displayTitle}
                         className="w-28 h-40 object-cover rounded-xl shadow-lg"
                         onError={(e) => {
                           e.currentTarget.src = 'https://placehold.co/112x160?text=No+Cover';
                         }}
                       />
                       <div className="flex-1">
-                        <h3 className="text-2xl font-bold text-slate-900 mb-2">{book.title}</h3>
-                        <p className="text-slate-600 mb-3 font-medium">by {book.author}</p>
+                        <h3 className="text-2xl font-bold text-slate-900 mb-2">{displayTitle}</h3>
+                        <p className="text-slate-600 mb-3 font-medium">by {displayAuthor}</p>
                         <p className="text-slate-700 mb-4 leading-relaxed">{rec.reason}</p>
                         <div className="flex flex-wrap items-center gap-3">
                           <div className="bg-gradient-to-r from-violet-100 to-indigo-100 px-3 py-1.5 rounded-xl border border-violet-200">
