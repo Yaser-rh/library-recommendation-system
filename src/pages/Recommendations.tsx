@@ -156,7 +156,7 @@ export function Recommendations() {
                         alt={book.title}
                         className="w-28 h-40 object-cover rounded-xl shadow-lg"
                         onError={(e) => {
-                          e.currentTarget.src = 'https://via.placeholder.com/112x160?text=No+Cover';
+                          e.currentTarget.src = 'https://placehold.co/112x160?text=No+Cover';
                         }}
                       />
                       <div className="flex-1">

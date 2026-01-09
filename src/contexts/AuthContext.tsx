@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { signIn, signUp, signOut, getCurrentUser } from 'aws-amplify/auth';
+import { signIn, signUp, signOut, getCurrentUser, fetchAuthSession } from 'aws-amplify/auth';
 import { User } from '@/types';
 import { AuthContext, AuthContextType } from './AuthContextCore';
 
@@ -77,12 +77,17 @@ export function AuthProvider({ children }: AuthProviderProps) {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const user = await getCurrentUser();
+        const session = await fetchAuthSession();
+        const currentUser = await getCurrentUser();
+
+        const groups = (session.tokens?.idToken?.payload['cognito:groups'] as string[]) || [];
+        const isAdmin = groups.includes('Admins');
+
         setUser({
-          id: user.userId,
+          id: currentUser.userId,
           email: '', // Map based on your Cognito attributes if needed
-          name: user.username,
-          role: 'user', // Default role
+          name: currentUser.username,
+          role: isAdmin ? 'admin' : 'user',
           createdAt: new Date().toISOString(),
         });
       } catch {
@@ -99,12 +104,16 @@ export function AuthProvider({ children }: AuthProviderProps) {
     try {
       const { isSignedIn } = await signIn({ username: email, password });
       if (isSignedIn) {
-        const user = await getCurrentUser();
+        const session = await fetchAuthSession();
+        const groups = (session.tokens?.idToken?.payload['cognito:groups'] as string[]) || [];
+        const isAdmin = groups.includes('Admins');
+
+        const currentUser = await getCurrentUser();
         setUser({
-          id: user.userId,
+          id: currentUser.userId,
           email: email,
-          name: user.username,
-          role: 'user',
+          name: currentUser.username,
+          role: isAdmin ? 'admin' : 'user',
           createdAt: new Date().toISOString(),
         });
       }
